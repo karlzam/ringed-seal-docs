@@ -1,8 +1,19 @@
 # Annotation Stats
 
-![site sum](sum_by_site.png)
+## Plots
+### By Site
+
+![sitesum](sum_by_site.png)
+
+![pie1](pie1.png)
+
+![sum](sum2_by_site.png)
+
+![pie2](pie2.png)
 
 ## Annotation Tables
+
+### By Site
 
 All 
 
