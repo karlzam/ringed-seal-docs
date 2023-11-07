@@ -1,11 +1,33 @@
 # Annotation Stats
 
+## Summary 
+
+#### Site
+- Ulu accounts for 53% of annotations, and these are also the best quality
+- Kitikmeot accounts for 41% of annotations, with large variability in the quality 
+- Pierce point is 2% (ok quality), and CB is 4% (lowest quality)
+
+#### Time
+- 2022 and 2018 have almost balanced number of annotations, but all of 2022 is in May
+- 2019 has the lowest number of annotations
+- Months are very uneven
+
+#### Manual Dataset Thoughts
+- Probably not a good idea to use a time to cut the data into 85/15 due to Ulu
+- What to do with the Ulu may data?
+- Maybe try to balance Ulu and KK, split those into 85:15 and then do an 85:15 with the remaining data separately?
+
+
 ## Plots
 ### By Site
+
+#### All Sites
 
 ![sitesum](sum_by_site.png)
 
 ![pie1](pie1.png)
+
+#### Combined Sites
 
 ![sum](sum2_by_site.png)
 
@@ -13,38 +35,45 @@
 
 ### By Time
 
+#### By Day
 ![time](sum_by_time.png)
 
+#### By Year
 ![time2](sum_by_year.png)
+
+#### By Month
+![month0](month_sum.png)
+
+![month](monthly_by_site.png)
+
+![month](monthly_by_site_comb.png)
 
 ## Annotation Tables
 
 ### By Site
 
-All 
+|                      | total-annot-# | b-annots | by-annots | total-#-barks | total-#-yelps | KZ notes                                                               |
+|----------------------|---------------|----------|-----------|---------------|---------------|------------------------------------------------------------------------|
+| CB300                | 41            | 21       | 20        | 68            | 44            | faint                                                                  |
+| CB50                 | 144           | 101      | 43        | 192           | 64            | very faint                                                             | 
+| Kitikmeot.2017.08-09 | 111           | 79       | 32        | 250           | 38            |                                                                        |
+| Kitikmeot.2017.09    | 5             | 2        | 3         | 6             | 3             | faint                                                                  |
+| Kitikmeot.2017.10    | 357           | 248      | 109       | 821           | 282           | lots of unannotated calls                                              |
+| Kitikmeot.2017.11-12 | 121           | 76       | 45        | 271           | 98            |                                                                        |
+| Kitikmeot.2018.01-03 | 81            | 63       | 18        | 106           | 24            |                                                                        |
+| Kitikmeot.2018.04    | 29            | 22       | 7         | 41            | 8             |                                                                        |
+| Kitikmeot.2018.05    | 74            | 59       | 15        | 84            | 19            |                                                                        |
+| Kitikmeot.2018.06-07 | 29            | 25       | 4         | 36            | 8             |                                                                        |
+| Kitikmeot.2018.08    | 33            | 24       | 9         | 49            | 18            | very faint                                                             |
+| Kitikmeot.2018.08-10 | 370           | 284      | 86        | 472           | 114           |                                                                        |
+| Kitikmeot.2018.11-12 | 435           | 354      | 81        | 484           | 102           | good ones                                                              |
+| Kitikmeot.2019.01-03 | 104           | 82       | 22        | 126           | 29            |                                                                        |
+| PP.2018.2019.AllYear | 71            | 40       | 31        | 123           | 79            |                                                                        |
+| Ulukhaktok.2017-2018 | 901           | 646      | 255       | 1353          | 414           | lots of groans                                                         |
+| ulu.2022             | 1362          | 680      | 682       | 2411          | 1246          | some calls are new - overlapping groans and yelps maybe. good quality. |
+| **total**            | **4268**      | **2806** | **1462**  | **6893**      | **2590**      |                                                                        |
 
-|                      | total-annot-# | b-annots | by-annots | total-#-barks | total-#-yelps |
-|----------------------|---------------|----------|-----------|---------------|---------------|
-| CB300                | 41            | 21       | 20        | 68            | 44            |
-| CB50                 | 144           | 101      | 43        | 192           | 64            |
-| Kitikmeot.2017.08-09 | 111           | 79       | 32        | 250           | 38            |
-| Kitikmeot.2017.09    | 5             | 2        | 3         | 6             | 3             |
-| Kitikmeot.2017.10    | 357           | 248      | 109       | 821           | 282           |
-| Kitikmeot.2017.11-12 | 121           | 76       | 45        | 271           | 98            |
-| Kitikmeot.2018.01-03 | 81            | 63       | 18        | 106           | 24            |
-| Kitikmeot.2018.04    | 29            | 22       | 7         | 41            | 8             |
-| Kitikmeot.2018.05    | 74            | 59       | 15        | 84            | 19            |
-| Kitikmeot.2018.06-07 | 29            | 25       | 4         | 36            | 8             |
-| Kitikmeot.2018.08    | 33            | 24       | 9         | 49            | 18            |
-| Kitikmeot.2018.08-10 | 370           | 284      | 86        | 472           | 114           |
-| Kitikmeot.2018.11-12 | 435           | 354      | 81        | 484           | 102           |
-| Kitikmeot.2019.01-03 | 104           | 82       | 22        | 126           | 29            |
-| PP.2018.2019.AllYear | 71            | 40       | 31        | 123           | 79            |
-| Ulukhaktok.2017-2018 | 901           | 646      | 255       | 1353          | 414           |
-| ulu.2022             | 1362          | 680      | 682       | 2411          | 1246          |
-| **total**            | **4268**      | **2806** | **1462**  | **6893**      | **2590**      |
-
-Summary
+#### Summary
 
 |            | **total-annot-#** | **% **  | **b-annots** | **% **  | **by-annots** | **% **  | **total-#-barks** | **% **  | **total-#-yelps** | **% **  |
 |------------|:-----------------:|---------|:------------:|---------|:-------------:|---------|:-----------------:|---------|:-----------------:|---------|
@@ -57,6 +86,8 @@ Summary
 
 ### By Time
 
+#### By Year
+
 |    date    | # of annotations |
 |:----------:|:----------------:|
 | 2017-12-31 | 1152             |
@@ -65,6 +96,38 @@ Summary
 | 2020-12-31 | 0                |
 | 2021-12-31 | 0                |
 | 2022-12-31 | 1362             |
+
+#### By Month
+
+|    date    | # of annotations |
+|:----------:|:----------------:|
+| 2017-08-31 | 6                |
+| 2017-09-30 | 116              |
+| 2017-10-31 | 357              |
+| 2017-11-30 | 172              |
+| 2017-12-31 | 501              |
+| 2018-01-31 | 335              |
+| 2018-02-28 | 29               |
+| 2018-03-31 | 60               |
+| 2018-04-30 | 29               |
+| 2018-05-31 | 74               |
+| 2018-06-30 | 14               |
+| 2018-07-31 | 15               |
+| 2018-08-31 | 35               |
+| 2018-09-30 | 8                |
+| 2018-10-31 | 360              |
+| 2018-11-30 | 353              |
+| 2018-12-31 | 93               |
+| 2019-01-31 | 128              |
+| 2019-02-28 | 37               |
+| 2019-03-31 | 30               |
+| 2019-04-30 | 87               |
+| 2019-05-31 | 39               |
+| 2019-07-31 | 17               |
+| 2019-08-31 | 11               |
+| 2022-05-31 | 1362             |
+
+#### By Day
 
 |    date    | # of annotations |
 |:----------:|:----------------:|
