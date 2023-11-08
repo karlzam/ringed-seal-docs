@@ -22,12 +22,12 @@
 
 The total numbers end up being: 
 
-|       | Ulu 2022 | Rest | Total |
-| ----- | -------- | ---- | ----- |
-| Train | 943      | 1998 | 2941  |
-| Val   | 268      | 570  | 838   |
-| Test  | 134      | 284  | 418   |
-
+|        | Ulu 2022 | Rest | Total |
+| ------ | -------- | ---- | ----- |
+| Train  | 949      | 1993 | 2942  |
+| Val    | 274      | 564  | 838   |
+| Test   | 139      | 278  | 417   |
+| Totals | 1362     | 2835 | 4197  |
 
 #### Time Dependence
 
@@ -42,24 +42,6 @@ Distributions:
 - Ulu is pretty evenly distributed after removing 2022 data 
 
 I think what I'll do is pick a time for each site that makes the correct # of annots. 
-
-
-|         | Rest | Div 3  |
-|---------|------|--------|
-| Train   | 1998 | 666    |
-| Val     | 570  | 190    |
-| Test    | 284  | 94.667 |
-| Total   | 2852 |        |
-
-So each of the three additional sites will be split: 
-
-|       | CB  | KK  | Ulu 2017 |
-| ----- | --- | --- | -------- |
-| Train | 667 | 667 | 666      |
-| Val   | 190 | 190 | 190      |
-| Test  | 94  | 94  | 94       |
-
-
 
 ### Steps 
 
@@ -86,16 +68,46 @@ So each of the three additional sites will be split:
 | Test  | 0.1 | 419.7                 | 419  | 134.08     | 134  | 284.92  | 284  |
 |       |     |                       | 4197 |            | 1345 |         | 2852 |
 
-and cleaned up a bit 
+but you notice the total number of ULU2022 annots (1345) is smaller than it should be (1362) by 17, 
+and the rest is higher than 17 (2835 vs. 2852). So, need to reshuffle the values to work out. 
 
-|       | Ulu 2022 | Rest | Total |
-| ----- | -------- | ---- | ----- |
-| Train | 943      | 1998 | 2941  |
-| Val   | 268      | 570  | 838   |
-| Test  | 134      | 284  | 418   |
-|       |          |      | 4197  |
+Add 5, 6, 6 to each Ulu set (with bias towards adding more to training), and remove the same from the rest (with bias towards removing less from training).
 
-7. Now that we've determined the numbers of each, how do we also account for time dependence? 
+|        | Ulu 2022 | Rest | Total |
+| ------ | -------- | ---- | ----- |
+| Train  | 949      | 1993 | 2942  |
+| Val    | 274      | 564  | 838   |
+| Test   | 139      | 278  | 417   |
+| Totals | 1362     | 2835 | 4197  |
+
+The "rest" needs to be split into the 3 sites, but can't just do a div by 3 because they have an uneven amount of samples. 
+
+So, find the proportion of the total that each represents:
+
+|         | CB       | KK          | ULU      |
+| ------- | -------- | ----------- | -------- |
+| Totals  | 185      | 1749        | 901      |
+| % Total | 0.065256 | 0.616931217 | 0.317813 |
+
+and then multiply that out by the "rest" column: 
+
+|        | CB       | KK          | ULU      |
+| ------ | -------- | ----------- | -------- |
+| Train  | 130.0547 | 1229.543915 | 633.4014 |
+| Val    | 36.80423 | 347.9492063 | 179.2466 |
+| Test   | 18.14109 | 171.5068783 | 88.35203 |
+| Totals | 185      | 1749        | 901      |
+
+and then round to whole values: 
+
+|        | CB  | KK   | ULU |
+| ------ | --- | ---- | --- |
+| Train  | 130 | 1230 | 634 |
+| Val    | 37  | 348  | 179 |
+| Test   | 18  | 171  | 88  |
+| Totals | 185 | 1749 | 901 |
+
+7. Now we know the number of samples for each site that needs to go into each database. I will sort each site by time, and then take the corresponding amount. 
 
 
 
