@@ -1,4 +1,4 @@
-# Annotation Stats & Manual DB
+# Annotation Stats 
 
 ## Annotation Summary 
 
@@ -12,63 +12,46 @@
 - 2019 has the lowest number of annotations
 - Months are very uneven
 
-## Manual Dataset Thoughts
-
-There are two main objectives with this detector: 
-
-1. Create a detector that works to detect ringed seal vocalizations in existing data
-2. Create a detector that works on new sites (ie. a detector with good generalizability)
-
-To start: Ulu, KK, and CB will be used and PP will be left out. 
-
-- Ulu has the best quality data and the most data 
-- KK has the second-best quality data, although much worse than Ulu 
-- CB has the worst quality data 
-- PP has ok quality but very low sample size 
-- The data from different sites can not be assumed to be identical due to the large variation in quality 
-
-Steps for first manual database:
-
-1. A high percentage of KK data will be used in the training set as it is of lower quality than Ulu 
-2. To top off the split, Ulu data will be used after the majority of KK data has been included
-3. The rest of the Ulu data will be used for validation and testing 
-4. CB will be split evenly through the sets (train, validate, test) to try to provide low quality samples 
-5. PP will be used to test if the detector can detect barks in new sites, and can fine tune existing model to see if can get better results 
-
-Fine-Tuning w PP Notes:
-
-- Fabio found in other detectors that unfreezing the last layer, or few layers, and running a few (2-3) epochs with a new site can fine-tune the model for that site
-
-
 ## Plots
 ### By Site
 
 #### All Sites
 
-![sitesum](sum_by_site.png)
+![sitesum](images\sum_by_site.png)
 
-![pie1](pie1.png)
+![pie1](images\pie1.png)
 
 #### Combined Sites
 
-![sum](sum2_by_site.png)
+![sum](images\sum2_by_site.png)
 
-![pie2](pie2.png)
+![pie2](images\pie2.png)
 
 ### By Time
 
 #### By Day
-![time](sum_by_time.png)
+![time](images\sum_by_time.png)
 
 #### By Year
-![time2](sum_by_year.png)
+![time2](images\sum_by_year.png)
 
 #### By Month
-![month0](month_sum.png)
 
-![month](monthly_by_site.png)
+![month0](images\month_sum.png)
 
-![month](monthly_by_site_comb.png)
+![month](images\monthly_by_site.png)
+
+![month](images\monthly_by_site_comb.png)
+
+##### By Site & Month
+
+![month](images\count_CB_by_month.png)
+
+![month](images\count_KK_by_month.png)
+
+![month](images\count_PP_by_month.png)
+
+![month](images\count_ULU_by_month.png)
 
 ## Annotation Tables
 
