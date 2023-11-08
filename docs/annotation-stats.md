@@ -1,6 +1,6 @@
-# Annotation Stats
+# Annotation Stats & Manual DB
 
-## Summary 
+## Annotation Summary 
 
 #### Site
 - Ulu accounts for 53% of annotations, and these are also the best quality
@@ -12,10 +12,32 @@
 - 2019 has the lowest number of annotations
 - Months are very uneven
 
-#### Manual Dataset Thoughts
-- Probably not a good idea to use a time to cut the data into 85/15 due to Ulu
-- What to do with the Ulu may data?
-- Maybe try to balance Ulu and KK, split those into 85:15 and then do an 85:15 with the remaining data separately?
+## Manual Dataset Thoughts
+
+There are two main objectives with this detector: 
+
+1. Create a detector that works to detect ringed seal vocalizations in existing data
+2. Create a detector that works on new sites (ie. a detector with good generalizability)
+
+To start: Ulu, KK, and CB will be used and PP will be left out. 
+
+- Ulu has the best quality data and the most data 
+- KK has the second-best quality data, although much worse than Ulu 
+- CB has the worst quality data 
+- PP has ok quality but very low sample size 
+- The data from different sites can not be assumed to be identical due to the large variation in quality 
+
+Steps for first manual database:
+
+1. A high percentage of KK data will be used in the training set as it is of lower quality than Ulu 
+2. To top off the split, Ulu data will be used after the majority of KK data has been included
+3. The rest of the Ulu data will be used for validation and testing 
+4. CB will be split evenly through the sets (train, validate, test) to try to provide low quality samples 
+5. PP will be used to test if the detector can detect barks in new sites, and can fine tune existing model to see if can get better results 
+
+Fine-Tuning w PP Notes:
+
+- Fabio found in other detectors that unfreezing the last layer, or few layers, and running a few (2-3) epochs with a new site can fine-tune the model for that site
 
 
 ## Plots
