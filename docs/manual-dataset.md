@@ -54,9 +54,9 @@ I think what I'll do is pick a time for each site that makes the correct # of an
 | ---------------------------------- | ---- | --- | ---- | --- | ----- | --------- |
 | Total # of annotations (w out PP): | 4197 | 185 | 1749 | 901 | 1362  | 2835      |
 
-![month](images\total annot split.png)
+![month](total annot split.png)
 
-![month](images\ulu22vsrest.png)
+![month](ulu22vsrest.png)
 
 5. Determine that ulu2022 data makes up for 32% of the annotations, and the rest make up for 68%
 6. Recreate this split in the train, val, and test datasets 
@@ -109,7 +109,22 @@ and then round to whole values:
 
 7. Now we know the number of samples for each site that needs to go into each database. I will sort each site by time, and then take the corresponding amount. 
 
+| Site    | Val              | Test             |
+| ------- | ---------------- | ---------------- |
+| CB      | 2019-05-01 1:33  | 2019-07-15 10:33 |
+| KK      | 2018-11-02 14:03 | 2018-12-05 10:03 |
+| ULU     | 2018-01-08 15:06 | 2018-01-20 16:06 |
+| ULU2022 | 2022-05-18 21:52 | 2022-05-21 20:08 |
 
+Plots: 
+
+![kk](KK_split.png)
+
+![CB](CB_split.png)
+
+![ULU](ULU_split.png)
+
+![ULU](ULU2022_split.png)
 
 ## Initial Thoughts
 

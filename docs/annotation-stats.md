@@ -17,41 +17,41 @@
 
 #### All Sites
 
-![sitesum](images\sum_by_site.png)
+![sitesum](sum_by_site.png)
 
-![pie1](images\pie1.png)
+![pie1](pie1.png)
 
 #### Combined Sites
 
-![sum](images\sum2_by_site.png)
+![sum](sum2_by_site.png)
 
-![pie2](images\pie2.png)
+![pie2](pie2.png)
 
 ### By Time
 
 #### By Day
-![time](images\sum_by_time.png)
+![time](sum_by_time.png)
 
 #### By Year
-![time2](images\sum_by_year.png)
+![time2](sum_by_year.png)
 
 #### By Month
 
-![month0](images\month_sum.png)
+![month0](month_sum.png)
 
-![month](images\monthly_by_site.png)
+![month](monthly_by_site.png)
 
-![month](images\monthly_by_site_comb.png)
+![month](monthly_by_site_comb.png)
 
 ##### By Site & Month
 
-![month](images\count_CB_by_month.png)
+![month](count_CB_by_month.png)
 
-![month](images\count_KK_by_month.png)
+![month](count_KK_by_month.png)
 
-![month](images\count_PP_by_month.png)
+![month](count_PP_by_month.png)
 
-![month](images\count_ULU_by_month.png)
+![month](count_ULU_by_month.png)
 
 ## Annotation Tables
 
