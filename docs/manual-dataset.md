@@ -1,5 +1,24 @@
 # Manual Dataset V1
 
+## Final Manual Dataset (2023-11-16)
+
+The below table represents a 68% "rest", 32% "ulu2022" split where "rest" refers to CB/KK/ULU for 
+each of the training, validation and testing datasets. 
+
+|        | CB (LT) | KK (LT) | ULU (LT) | ULU22 (ST) |
+|--------|---------|---------|----------|------------|
+| Train  | 130     | 1230    | 634      | 949        |
+| Val    | 37      | 348     | 179      | 274        |
+| Test   | 18      | 171     | 88       | 139        | 
+| Totals | 185     | 1749    | 901      | 1362       | 
+
+This is ensuring that 68% of each dataset is long-term deployments, "topped up" with the shorter,
+better quality, ulu2022 deployments. Can be thought of as "long term deployments vs. short term 
+deployments". 
+
+Next step is to generate an equal number of noise segments per site, manually check them, 
+and use this going forward.
+
 ## Process 
 
 ### Logic
