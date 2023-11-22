@@ -19,6 +19,17 @@ deployments".
 Next step is to generate an equal number of noise segments per site, manually check them, 
 and use this going forward.
 
+### Checking Manual Dataset 
+
+**Keys:**
+- O: other than RS
+- 0B: bearded seal
+- OU: other signal unknown
+- RS: ringed seal (or probably a ringed seal)
+- OK: other knock like signal
+
+If there is a ringed seal vocalization, pick another noise sample from the same wav file. 
+
 ## Process 
 
 ### Logic
