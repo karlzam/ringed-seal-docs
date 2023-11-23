@@ -29,8 +29,11 @@ and use this going forward.
 - RS: ringed seal (or probably a ringed seal)
 - OK: other knock like signal
 
-
 If there is a ringed seal vocalization, pick another noise sample from the same wav file. 
+
+- Negative segments were selected by: 
+  - using full annotation tables containing vocalizations that were discarded so that no negative segments would be generated containing annotated RS vocalizations 
+  - using the ketos function with a 4sec buffer and not allowing any overlap with existing annotations
 
 ## Process 
 
