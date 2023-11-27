@@ -35,6 +35,19 @@ If there is a ringed seal vocalization, pick another noise sample from the same 
   - using full annotation tables containing vocalizations that were discarded so that no negative segments would be generated containing annotated RS vocalizations 
   - using the ketos function with a 4sec buffer and not allowing any overlap with existing annotations
 
+### Common Types of Noise 
+
+- Knocks 
+- Boat
+- Water 
+- Bearded seal
+- Ice
+- Electronic noise 
+- Bowhead or other biological
+- Instrument noise 
+
+Ones that commonly confused me: knocking, scratching, water noise
+
 ## Process 
 
 ### Logic
