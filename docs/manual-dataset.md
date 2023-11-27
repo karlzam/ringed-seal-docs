@@ -35,6 +35,28 @@ If there is a ringed seal vocalization, pick another noise sample from the same 
   - using full annotation tables containing vocalizations that were discarded so that no negative segments would be generated containing annotated RS vocalizations 
   - using the ketos function with a 4sec buffer and not allowing any overlap with existing annotations
 
+
+| Segments          | CB  | KK   | PP  | ULU | ULU22 |
+| ----------------- | --- | ---- |-----| --- | ----- |
+| noise             | 185 | 1749 | 71  | 901 | 1362  |
+| OK                | 14  | 85   | 11  | 292 | 170   |
+| OB                | 73  | 26   | 4   | 19  | 106   |
+| OU                | 6   | 92   | 5   | 109 | 38    |
+| O                 | 87  | 1519 | 51  | 456 | 1046  |
+| RS (replacements) | 5   | 27   | 0   | 25  | 2     |
+
+| In percentages          | CB    | KK    | PP    | ULU   | ULU22 |
+| ----------------------- | ----- | ----- | ----- | ----- | ----- |
+| \# of OK                | 7.57  | 4.86  | 15.49 | 32.41 | 12.48 |
+| \# of OB                | 39.46 | 1.49  | 5.63  | 2.11  | 7.78  |
+| \# of OU                | 3.24  | 5.26  | 7.04  | 12.10 | 2.79  |
+| \# of O                 | 47.03 | 86.85 | 71.83 | 50.61 | 76.80 |
+| \# of RS (replacements) | 2.70  | 1.54  | 0.00  | 2.77  | 0.15  |
+
+![noise](noise_dist.png)
+
+![noisep](noise_dist2.png)
+
 ### Common Types of Noise 
 
 - Knocks 
