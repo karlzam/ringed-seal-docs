@@ -16,15 +16,22 @@ This is ensuring that 68% of each dataset is long-term deployments, "topped up" 
 better quality, ulu2022 deployments. Can be thought of as "long term deployments vs. short term 
 deployments". 
 
-Next step is to generate an equal number of noise segments per site, manually check them, 
-and use this going forward.
+Note that these values changed slightly if there were selections outside of the start and end time 
+of the file. This could happen if an annotater included multiple files and selected annotations
+in between two wav files. This only happened for positive selections. 
+
+|                          | CB   | ULU | ULU2022 | KK  | PP   |
+|--------------------------|------| --- | ------- |-----|------|
+| \# of dropped selections | 1    | 8   | 14      | 12  | 0    |
+
+![wut](images\Black-Girl-Wat.png)
 
 ### Checking Manual Dataset 
 
 **Keys:**
 
 - O: other than RS
-- 0B: bearded seal
+- OB: bearded seal
 - OU: other signal unknown
 - RS: ringed seal (or probably a ringed seal)
 - OK: other knock like signal
@@ -34,7 +41,6 @@ If there is a ringed seal vocalization, pick another noise sample from the same 
 - Negative segments were selected by: 
   - using full annotation tables containing vocalizations that were discarded so that no negative segments would be generated containing annotated RS vocalizations 
   - using the ketos function with a 4sec buffer and not allowing any overlap with existing annotations
-
 
 | Segments          | CB  | KK   | PP  | ULU | ULU22 |
 | ----------------- | --- | ---- |-----| --- | ----- |

@@ -9,6 +9,10 @@
 - Growls were lumped into the “bark” category if within previously annotated region
 - If I see an unannotated call that looks similar close to a previous annotation, I’ll add it 
 - Manually check noise segments once generated
+- Another thing I've learned (2023-11-28): Good to make sure annotations aren't spanning multiple files, 
+or if they're really close to the end of a file noting that that's the case. This causes issues 
+in later processing b/c the start and end time will be outside of the file duration (issue
+specific to ketos)
 
 ## Column names: 
 - KZ Keep? (Y/X/M)	
