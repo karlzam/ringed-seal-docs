@@ -24,7 +24,6 @@ in between two wav files. This only happened for positive selections.
 |--------------------------|------| --- | ------- |-----|------|
 | \# of dropped selections | 1    | 8   | 14      | 12  | 0    |
 
-![wut](images\Black-Girl-Wat.png)
 
 ### Checking Manual Dataset 
 
