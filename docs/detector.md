@@ -1,4 +1,4 @@
-# Ringed Seal Detector
+# Detector Code V1
 
 This notebook has the final code used to create the ringed seal detector. 
 
