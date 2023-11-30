@@ -2,7 +2,7 @@
 
 - True detections have low scores (none above 0.5)
 - Lots of water noise and bearded seals in the false positives 
-- Tried on Pierce Point and it doesn't work, will need to try fine-tuning with Fabios help 
+- Tried on Pearce Point and it doesn't work, will need to try fine-tuning with Fabios help 
 
 ## Images
 

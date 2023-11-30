@@ -1,4 +1,4 @@
-# Pierce Point Test w Detector v1
+# Pearce Point Test w Detector v1
 
 This notebook has the final code used to create the ringed seal detector. 
 
