@@ -10,5 +10,6 @@
 
 ## Deploy Detector 
 
+![deploy](Deploy_Detector.png)
 
 
