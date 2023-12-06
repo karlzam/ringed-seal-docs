@@ -11,7 +11,3 @@
 ## Deploy Detector 
 
 ![deploy](Deploy_Detector.png)
-
-## Model Architecture 
-
-![arch](Model_Arch.png)
