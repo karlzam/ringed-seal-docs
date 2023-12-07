@@ -1,10 +1,45 @@
-# Detector Code V1
+# Ringed Seal Detector
 
 This notebook has the final code used to create the ringed seal detector. 
 
-## User Inputs
+## Import Packages
+
 
 ```python
+import pandas as pd
+import numpy as np
+import tensorflow as tf
+import seaborn as sns
+import shutil
+import os 
+import csv
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix
+
+from ketos.data_handling import selection_table as sl
+import ketos.data_handling.database_interface as dbi
+from ketos.data_handling.parsing import load_audio_representation
+from ketos.data_handling.data_feeding import BatchGenerator
+from ketos.neural_networks.resnet import ResNetInterface
+from ketos.audio.audio_loader import AudioFrameLoader, AudioLoader, SelectionTableIterator
+from ketos.audio.spectrogram import MagSpectrogram
+from ketos.neural_networks.dev_utils.detection import batch_load_audio_file_data, filter_by_threshold
+from ketos.data_handling.data_feeding import JointBatchGen
+
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
+print('done importing packages')
+```
+
+    done importing packages
+    
+
+## User Inputs
+
+
+```python
+# Load in user inputs 
 main_folder = r'C:\Users\kzammit\Documents\Detector\manual_detector_2sec'
 neg_folder = main_folder + '\\' + r'inputs\annotations\edited_sels\negatives'
 pos_folder = main_folder + '\\' + r'inputs\annotations\edited_sels\positives'
@@ -14,6 +49,7 @@ db_name = main_folder + '\\' r'manual_database_2sec.h5'
 recipe = main_folder + '\\' + r'inputs\resnet_recipe.json'
 output_name = main_folder + '\\' + 'rs-2sec.kt'
 
+# Define the split for the training, validation, and test datasets from each site 
 ulu_vals = [634, 179, 88]
 ulu2022_vals = [949, 274, 139]
 kk_vals = [1230, 348, 171]
@@ -26,11 +62,6 @@ A database consisting of manually verified spectrogram segments is created using
 
 
 ```python
-import pandas as pd
-from ketos.data_handling import selection_table as sl
-import ketos.data_handling.database_interface as dbi
-from ketos.data_handling.parsing import load_audio_representation
-
 ## Create Database ##
 
 # negatives tables and standarize for ketos
@@ -133,8 +164,13 @@ test = pd.concat([ulu_te, ulu2022_te, cb_te, kk_te])
 
 # join into a database
 
+# Load the spectrogram representation & parameters, this returns a dict 
 spec_cfg = load_audio_representation(spec_file, name="spectrogram")
 
+# Create a table called "train" in the database, defined by db_name, using the "train" selections table, the spectrogram config, and the audio data 
+# Behind the hood, this creates an AudioLoader and AudioWriter Ketos function which generates the spectrograms for each selection 
+# For the specific spectrogram in this case, the spectrograms are of size [1500,56] where 56 refers to the frequency dimension and 1500 refers to the time dimension 
+# The size of the spectrogram is 1500*56, which is 84000
 dbi.create_database(output_file=db_name,  # empty brackets
                     dataset_name=r'train', selections=train, data_dir=data_folder,
                     audio_repres=spec_cfg)
@@ -146,7 +182,6 @@ dbi.create_database(output_file=db_name,  # empty brackets
 dbi.create_database(output_file=db_name,  # empty brackets
                     dataset_name=r'test', selections=test, data_dir=data_folder,
                     audio_repres=spec_cfg)
-
 ```
 
     Negatives standardized? True
@@ -184,6 +219,7 @@ dbi.create_database(output_file=db_name,  # empty brackets
 
 
 ```python
+# Save the final excel sheets for future reference 
 train.to_excel(main_folder + '\\' + 'sel_train.xlsx')
 val.to_excel(main_folder + '\\' + 'sel_val.xlsx')
 test.to_excel(main_folder + '\\' + 'sel_test.xlsx')
@@ -193,39 +229,56 @@ test.to_excel(main_folder + '\\' + 'sel_test.xlsx')
 
 
 ```python
-import numpy as np
-import tensorflow as tf
-from ketos.data_handling.data_feeding import BatchGenerator
-from ketos.neural_networks.resnet import ResNetInterface
-
+# Set the random seed for numpy and tensorflow 
 np.random.seed(1000)
 tf.random.set_seed(2000)
 
+# Set the batch size and number of epochs for training
 batch_size = 16
 n_epochs = 40
+
+# Set the log folder and checkpoint folder 
 log_folder = main_folder + '\\' + 'logs'
 checkpoint_folder = main_folder + '\\' + 'checkpoints'
 
+# Open the database file in read mode
 db = dbi.open_file(db_name, 'r')
 
+# Open the training and validation tables respectively 
 train_data = dbi.open_table(db, "/train/data")
 val_data = dbi.open_table(db, "/val/data")
 
+# Create batches of training data of size batch size, using the specified data table 
+# This returns indices of the data in each batch along with their labels 
 train_generator = BatchGenerator(batch_size=batch_size, data_table=train_data,
                                     output_transform_func=ResNetInterface.transform_batch,
                                     shuffle=True, refresh_on_epoch_end=True)
 
+# Create batches of validation data of size batch size, using the specified data table 
+# This returns indices of the data in each batch along with their labels 
 val_generator = BatchGenerator(batch_size=batch_size, data_table=val_data,
                                    output_transform_func=ResNetInterface.transform_batch,
                                    shuffle=False, refresh_on_epoch_end=False)
 
+# Build the ResNet model file based off of the recipe file - this creates a "ResNetInterface" object 
 resnet = ResNetInterface.build(recipe)
+
+# Set the training and validation generators to the batch generators created above 
 resnet.train_generator = train_generator
 resnet.val_generator = val_generator
+
+# Set the model log and checkpoint directory 
 resnet.log_dir = log_folder
 resnet.checkpoint_dir = checkpoint_folder
+
+# Train the model, looping through all of the training and validation data 
+# See code map for more information
 resnet.train_loop(n_epochs=n_epochs, verbose=True, log_csv=True, csv_name='log.csv')
+
+# Close the database 
 db.close()
+
+# Save the model file, and keep track of the spectrogram parameters used to generate that model 
 resnet.save(output_name, audio_repr_file=spec_file)
 ```
 
@@ -603,22 +656,33 @@ resnet.save(output_name, audio_repr_file=spec_file)
 
 
 ```python
-import seaborn as sns
-import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
-
+# Get path to folder containing logs 
 log_folder = main_folder + '\\' + 'logs'
 
+# Read the log file 
 log_file = pd.read_csv(log_folder + '\\' + 'log.csv')
 
+# Get the training and validation losses 
 tr_results = log_file[log_file['dataset']=='train']
 va_results = log_file[log_file['dataset']=='val']
 
+# Plot the loss curves 
 sns.lineplot(data=tr_results, x='epoch', y='loss', label='train', legend='auto')
 sns.lineplot(data=va_results, x='epoch', y='loss', label='val', legend='auto')   
 ```
 
-![curve](curve.png)
+
+
+
+    <Axes: xlabel='epoch', ylabel='loss'>
+
+
+
+
+    
+![png](output_11_1.png)
+    
+
 
 ## Step Three: Deploy Detector
 
@@ -628,10 +692,13 @@ sns.lineplot(data=va_results, x='epoch', y='loss', label='val', legend='auto')
 ```python
 import shutil
 
+# Necessary for other steps 
 test_filled = test.reset_index(allow_duplicates=True)
 
+# Set pathway to audio folder 
 audio_folder = main_folder + '\\' + 'audio'
 
+# Copy files from main data folder into audio folder if they match the testing dataframe files 
 for idex, row in test_filled.iterrows():
     shutil.copyfile(test_filled.loc[idex]['filename'], audio_folder + '\\' + test_filled.loc[idex]['filename'].split('\\')[-1])
 
@@ -645,31 +712,41 @@ print('done')
 
 
 ```python
-from ketos.audio.audio_loader import AudioFrameLoader, AudioLoader, SelectionTableIterator
-from ketos.audio.spectrogram import MagSpectrogram
-from ketos.neural_networks.dev_utils.detection import batch_load_audio_file_data, filter_by_threshold
-
+# Set the temp folder, detections csv, detections threshold, step size, batch size, and buffer 
 temp_folder = main_folder + '\\' + 'ringedS_tmp_folder'
 detections_csv = main_folder + '\\' + 'detections_raw.csv'
 threshold = 0.5
 step_size = 2.0
 batch_size = 16
 buffer = 0.5 
+```
 
+
+```python
+# Load the already trained model file 
 model = ResNetInterface.load(model_file=output_name, new_model_folder=temp_folder)
 
+# Load the audio representation (dict)
 audio_repr = load_audio_representation(path=spec_file)
 
+# Get the config from the "spectrogram" audio representation
+# This is helpful if I had "waveform" as well in the representation options as well 
 spec_config = audio_repr['spectrogram']
 
+# Create an audioFrameLoader containing the spectrogram parameters and type 
 audio_loader = AudioFrameLoader(path=audio_folder, duration=spec_config['duration'],
                                     step=step_size, stop=False, representation=spec_config['type'],
                                     representation_params=spec_config, pad=False)
+
+# Initialize a detections dataframe 
 detections = pd.DataFrame()
 
+# Load the audio data in the defined batch size with the audio loader object 
 batch_generator = batch_load_audio_file_data(loader=audio_loader, batch_size=batch_size)
 
+# for each batch
 for batch_data in batch_generator:
+    
     # Run the model on the spectrogram data from the current batch
     batch_predictions = model.run_on_batch(batch_data['data'], return_raw_output=True)
 
@@ -677,11 +754,14 @@ for batch_data in batch_generator:
     raw_output = {'filename': batch_data['filename'], 'start': batch_data['start'], 'end': batch_data['end'],
                   'score': batch_predictions}
 
+    # Filter the raw detections by the threshold, dropping detections below the threshold 
+    # will be a dataframe with the filename, start, end, label, and score 
     batch_detections = filter_by_threshold(raw_output, threshold=threshold)
 
-    # What do these labels represent? Is it 0 for no, and 1 for yes? why is 0 included in the
+    # Add these detections to the detections dataframe 
     detections = pd.concat([detections, batch_detections], ignore_index=True)
 
+# Output the detections that were over a threshold to a csv file
 detections.to_csv(detections_csv, index=False)
 ```
 
@@ -722,49 +802,18 @@ detections.to_csv(detections_csv, index=False)
 
 
 ```python
-detected_list = []
-
-for idx, row in test_filled.iterrows():  # loop over annotations
-    filename_annot = row['filename'].split("\\")[-1]
-    time_annot_start = row['start']
-    time_annot_end = row['end']
-    detected = False
-    for _, d in detections.iterrows():  # loop over detections
-        filename_det = d['filename']
-        start_det = d['start']
-        end_det = start_det + d['end']
-        # if the filenames match and the annotated time falls with the start and
-        # end time of the detection interval, consider the call detected
-        if filename_annot == filename_det and time_annot_start >= start_det and time_annot_end <= end_det:
-            detected = True
-            break
-
-    detected_list.append(detected)
-
-test_filled['detected'] = detected_list  # add column to the annotations table
-
-test_filled.to_excel(main_folder + r'\detected_annotations.xlsx')
-
-print('done')
-```
-
-    done
-    
-
-
-```python
 def compute_detections(labels, scores, threshold=0.5):
-    """
 
-    :param labels:
-    :param scores:
-    :param threshold:
-    :return:
-    """
+    # Compute the positive scores above threshold, 1 if it is above threshold, 0 if it is not 
     predictions = np.where(scores >= threshold, 1,0)
 
+    # TP: Does the annotated label match the prediction above threshold? Bc "scores" is defined as the positive threshold, this represents TP
     TP = tf.math.count_nonzero(predictions * labels).numpy()
+
+    # TN: Negative score is "predictions - 1" bc predictions was for the positive result, labels-1 so that the negatives are multiplied by 1
     TN = tf.math.count_nonzero((predictions - 1) * (labels - 1)).numpy()
+
+    # And so on 
     FP = tf.math.count_nonzero(predictions * (labels - 1)).numpy()
     FN = tf.math.count_nonzero((predictions - 1) * labels).numpy()
 
@@ -773,12 +822,10 @@ def compute_detections(labels, scores, threshold=0.5):
 
 
 ```python
-from ketos.data_handling.data_feeding import JointBatchGen
-import os 
-import csv
-
+# Get pathway to metrics folder 
 output_dir = main_folder + '\\' + 'metrics'
 
+# Open the database in read only file 
 db = dbi.open_file(db_name, 'r')
 
 # Load the trained model
@@ -787,46 +834,57 @@ model = ResNetInterface.load(output_name, load_audio_repr=False, new_model_folde
 # Open the table in the database at the root level
 table = dbi.open_table(db, '/test')
 
-# Convert the data to the correct format for the model, and generate batches of data
+# Initialize Joint Batch Generator 
 gens = []
 
-# not sure?
+# Calculate the batch_size fixing the original batch size so there are no remainders 
 batch_size = int(batch_size / sum(1 for _ in db.walk_nodes(table, "Table")))
 
-# for the testing dataset
+# for the testing dataset table in the database (or whatever table is passed in)
 for group in db.walk_nodes(table, "Table"):
+
+    # Create a batch generator for this table
     generator = BatchGenerator(batch_size=batch_size, data_table=group,
                                output_transform_func=ResNetInterface.transform_batch, shuffle=False,
                                refresh_on_epoch_end=False, x_field='data', return_batch_ids=True)
 
-    # attach the batches together so there's one for each dataset
+    # Append the generator to the gens array 
     gens.append(generator)
 
+# Create a joint batch generator if multiple tables are passed through 
 gen = JointBatchGen(gens, n_batches='min', shuffle_batch=False, reset_generators=False, return_batch_ids=True)
 
+# Initialize the scores and labels 
 scores = []
 labels = []
 
+# For each batch in the joint batch generator 
 for batch_id in range(gen.n_batches):
+
+    # Get the ids, spectrograms, and labels for the data in the batch
     hdf5_ids, batch_X, batch_Y = next(gen)
 
+    # Get the labels for the batch data, using the "argmax" func which returns the col header, so 0 is a noise segment, 1 is a rs segment 
     batch_labels = np.argmax(batch_Y, axis=1)
 
-    # will return the scores for just one class (with label 1)
+    # Returns the scores for the batch for the "positive" class - this is used in the compute detections function later on
     batch_scores = model.model.predict_on_batch(batch_X)[:, 1]
 
+    # Add these scores for this batch to the overall list
     scores.extend(batch_scores)
     labels.extend(batch_labels)
 
+# Create a numpy array for the labels and scores for all batches 
 labels = np.array(labels)
 scores = np.array(scores)
 
-print('Length of labels is ' + str(len(labels)))
-
+# Compute the predictions, TP, TN, FP, and FN
+# Predicted is an array are greater than a certain threshold, 1 for the score was, 0 for it was not 
 predicted, TP, TN, FP, FN = compute_detections(labels, scores, threshold)
 
 print(f'\nSaving detections output to {output_dir}/')
 
+# Create the "classifications" csv file 
 df_group = pd.DataFrame()
 for group in db.walk_nodes(table, "Table"):
     df = pd.DataFrame({'id': group[:]['id'], 'filename': group[:]['filename']})
@@ -836,11 +894,16 @@ df_group['predicted'] = predicted[:]
 df_group['score'] = scores[:]
 df_group.to_csv(os.path.join(os.getcwd(), output_dir, "classifications.csv"), mode='w', index=False)
 
+# Calculate performance metrics 
 precision = TP / (TP + FP)
 recall = TP / (TP + FN)
 f1 = 2 * precision * recall / (precision + recall)
 FPP = FP / (TN + FP)
+
+# Create a confusion matrix 
 confusion_matrix = [[TP, FN], [FP, TN]]
+
+# Print the results 
 print(f'\nPrecision: {precision}')
 print(f'Recall: {recall}')
 print(f'F1 Score: {f1}')
@@ -850,6 +913,7 @@ print('[FP, TN]')
 print(f'{confusion_matrix[0]}')
 print(f'{confusion_matrix[1]}')
 
+# Save to an excel file 
 print(f"\nSaving metrics to {output_dir}/")
 
 # Saving precision recall and F1 Score for the defined thrshold
@@ -860,9 +924,9 @@ metrics_df.to_csv(os.path.join(os.getcwd(), output_dir, "metrics.csv"), mode='w'
 
 # Appending a confusion matrix to the file
 row1 = ["Confusion Matrix", "Predicted"]
-row2 = ["Actual", "RS", "Background Noise"]
+row2 = ["Actual", "RS", "Noise"]
 row3 = ["RS", TP, FN]
-row4 = ["Background Noise", FP, TN]
+row4 = ["Noise", FP, TN]
 with open(os.path.join(os.getcwd(), output_dir, "metrics.csv"), 'a', encoding='UTF8') as f:
     writer = csv.writer(f)
     writer.writerow([])
@@ -874,7 +938,6 @@ with open(os.path.join(os.getcwd(), output_dir, "metrics.csv"), 'a', encoding='U
 db.close()
 ```
 
-    Length of labels is 832
     
     Saving detections output to C:\Users\kzammit\Documents\Detector\manual_detector_2sec\metrics/
     
@@ -894,8 +957,6 @@ db.close()
 
 
 ```python
-import matplotlib.pyplot as plt
-
 def confusion_matrix_plot(cf, output_folder,
                           group_names=None,
                           categories='auto',
@@ -1010,13 +1071,11 @@ def confusion_matrix_plot(cf, output_folder,
 
 
 ```python
-from sklearn.metrics import confusion_matrix
-
 classifications_file = output_dir + '\\' + 'classifications.csv'
 
 classifications = pd.read_csv(classifications_file)
 
-cm = confusion_matrix(classifications['label'], classifications['predicted'])
+cm = confusion_matrix(classifications['predicted'], classifications['label'])
 
 labels = ['True Pos', 'False Neg', 'False Pos', 'True Neg']
 categories = ['Ringed Seal', 'Noise']
@@ -1028,12 +1087,11 @@ confusion_matrix_plot(cm, output_dir, group_names=labels, categories=categories,
                  cmap='viridis')
 ```
 
+    no title
     
-![png](cm.png)
+
+
+    
+![png](output_22_1.png)
     
 
-
-
-```python
-
-```
