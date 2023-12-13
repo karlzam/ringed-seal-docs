@@ -1,16 +1,46 @@
-# Pearce Point Test w Detector v1
+# PP Test Model 3 from 1 sec Ensemble
 
 This notebook has the final code used to create the ringed seal detector. 
+
+
+```python
+import pandas as pd
+from ketos.data_handling import selection_table as sl
+import ketos.data_handling.database_interface as dbi
+from ketos.data_handling.parsing import load_audio_representation
+from ketos.audio.audio_loader import AudioFrameLoader, AudioLoader, SelectionTableIterator
+from ketos.audio.spectrogram import MagSpectrogram
+from ketos.neural_networks.dev_utils.detection import batch_load_audio_file_data, filter_by_threshold
+import numpy as np
+import tensorflow as tf
+from ketos.data_handling.data_feeding import BatchGenerator
+from ketos.neural_networks.resnet import ResNetInterface
+import shutil
+from ketos.data_handling.data_feeding import JointBatchGen
+import matplotlib.pyplot as plt
+import seaborn as sns
+import os 
+import csv
+from sklearn.metrics import confusion_matrix as confusion_matrix_sklearn
+
+print('done')
+```
+
+    C:\Users\kzammit\Miniconda3\envs\ketos_env\lib\site-packages\keras\optimizer_v2\adam.py:105: UserWarning: The `lr` argument is deprecated, use `learning_rate` instead.
+      super(Adam, self).__init__(name, **kwargs)
+    
+
+    done
+    
 
 ## User Inputs
 
 
 ```python
-main_folder = r'C:\Users\kzammit\Documents\Detector\manual_detector_2sec\pp-test'
-spec_file = main_folder + '\\' + 'spec_config_2sec.json'
+main_folder = r'C:\Users\kzammit\Documents\Detector\detector-1sec\pp-test'
+spec_file = r'C:\Users\kzammit\Documents\Detector\detector-1sec\inputs\spec_config_1sec.json'
 data_folder = r'D:\ringed-seal-data'
 db_name = main_folder + '\\' r'pierce_point_db.h5'
-
 ```
 
 ## Step One: Create Database 
@@ -19,45 +49,48 @@ A database consisting of manually verified spectrogram segments is created using
 
 
 ```python
-import pandas as pd
-from ketos.data_handling import selection_table as sl
-import ketos.data_handling.database_interface as dbi
-from ketos.data_handling.parsing import load_audio_representation
-
 ## Create Database ##
 
 pp_pos = pd.read_excel(main_folder + '\\' + 'std_PP_positives.xlsx')
 pp_pos2 = pp_pos.ffill()
 pp_pos2 = sl.standardize(table=pp_pos2, start_labels_at_1=True)
-print('Negatives standardized? ' + str(sl.is_standardized(pp_pos2)))
+print('Positives standardized? ' + str(sl.is_standardized(pp_pos2)))
 
-# join into a database
+pp_neg = pd.read_excel(main_folder + '\\' + 'std_PP_negatives-manual-FINAL.xlsx')
+pp_neg2 = pp_pos.ffill()
+pp_neg2 = sl.standardize(table=pp_neg2, start_labels_at_1=False)
+print('Negatives standardized? ' + str(sl.is_standardized(pp_neg2)))
 
-spec_cfg = load_audio_representation(spec_file, name="spectrogram")
+pp_all = pd.concat([pp_pos2, pp_neg2])
 
-dbi.create_database(output_file=db_name,  # empty brackets
-                    dataset_name=r'test', selections=pp_pos2, data_dir=data_folder,
-                    audio_repres=spec_cfg)
+#print(pp_all.head())
+#print(pp_all.tail())
 ```
 
+    Positives standardized? True
     Negatives standardized? True
-    
-
-    100%|██████████████████████████████████████████████████████████████████████████████████| 71/71 [00:00<00:00, 74.81it/s]
-
-    71 items saved to C:\Users\kzammit\Documents\Detector\manual_detector_2sec\pp-test\pierce_point_db.h5
-    
-
-    
     
 
 
 ```python
-import tables
-tables.file._open_files.close_all()
+pp_all.to_excel(main_folder + '\\' + 'all_pp_annots.xlsx')
 ```
 
-    Closing remaining open files:C:\Users\kzammit\Documents\Detector\manual_detector_2sec\pp-test\pierce_point_db.h5...done
+
+```python
+spec_cfg = load_audio_representation(spec_file, name="spectrogram")
+
+dbi.create_database(output_file=db_name,  # empty brackets
+                    dataset_name=r'test', selections=pp_all, data_dir=data_folder,
+                    audio_repres=spec_cfg)
+```
+
+    100%|████████████████████████████████████████████████████████████████████████████████| 142/142 [00:13<00:00, 10.81it/s]
+
+    142 items saved to C:\Users\kzammit\Documents\Detector\detector-1sec\pp-test\pierce_point_db.h5
+    
+
+    
     
 
 ## Step Three: Deploy Detector
@@ -66,14 +99,14 @@ tables.file._open_files.close_all()
 
 
 ```python
-import shutil
+annots = pd.read_excel(r'C:\Users\kzammit\Documents\Detector\detector-1sec\pp-test\all_pp_annots.xlsx')
 
-pp_pos3 = pp_pos.ffill()
+annotsf = annots.ffill()
 
-audio_folder = r'C:\Users\kzammit\Documents\Detector\manual_detector_2sec\pp-test\audio'
+audio_folder = r'C:\Users\kzammit\Documents\Detector\detector-1sec\pp-test\audio'
 
-for idex, row in pp_pos3.iterrows():
-    shutil.copyfile(pp_pos3.loc[idex]['filename'], audio_folder + '\\' + pp_pos3.loc[idex]['filename'].split('\\')[-1])
+for idex, row in annotsf.iterrows():
+    shutil.copyfile(annotsf.loc[idex]['filename'], audio_folder + '\\' + annotsf.loc[idex]['filename'].split('\\')[-1])
 
 print('done')
 ```
@@ -85,21 +118,15 @@ print('done')
 
 
 ```python
-from ketos.audio.audio_loader import AudioFrameLoader, AudioLoader, SelectionTableIterator
-from ketos.audio.spectrogram import MagSpectrogram
-from ketos.neural_networks.dev_utils.detection import batch_load_audio_file_data, filter_by_threshold
-import numpy as np
-import tensorflow as tf
-from ketos.data_handling.data_feeding import BatchGenerator
-from ketos.neural_networks.resnet import ResNetInterface
-
 temp_folder = main_folder + '\\' + 'ringedS_tmp_folder'
 detections_csv = main_folder + '\\' + 'detections_raw.csv'
 threshold = 0.5
-step_size = 2.0
+step_size = 1.0
 batch_size = 16
 buffer = 0.5 
-output_name = main_folder + '\\' + 'rs-2sec.kt'
+output_name = r'C:\Users\kzammit\Documents\Detector\detector-1sec\rs-1sec-3.kt'
+
+audio_folder = r'C:\Users\kzammit\Documents\Detector\detector-1sec\pp-test\audio'
 
 model = ResNetInterface.load(model_file=output_name, new_model_folder=temp_folder)
 
@@ -130,44 +157,11 @@ for batch_data in batch_generator:
 detections.to_csv(detections_csv, index=False)
 ```
 
-      0%|                                                                                          | 0/149 [00:00<?, ?it/s]RuntimeWarning: Waveform padded with its own reflection to achieve required length to compute the stft. 73 samples were padded on the left and 0 samples were padded on the right
-    100%|████████████████████████████████████████████████████████████████████████████████| 149/149 [00:20<00:00,  7.37it/s]
+      0%|                                                                                          | 0/299 [00:00<?, ?it/s]RuntimeWarning: Waveform padded with its own reflection to achieve required length to compute the stft. 73 samples were padded on the left and 0 samples were padded on the right
+    100%|████████████████████████████████████████████████████████████████████████████████| 299/299 [00:38<00:00,  7.70it/s]
     
 
 ## Compare Results
-
-
-```python
-#annotations = pd.read_excel(r'C:\Users\kzammit\Documents\Detector\manual_detector_2sec\sel_test_pos.xlsx')
-#annotations = annotations.ffill()
-#detections = pd.read_csv(r'C:\Users\kzammit\Documents\Detector\manual_detector_2sec\detections_raw.csv')
-
-#detected_list = []
-
-#for idx, row in annotations.iterrows():  # loop over annotations
-#    filename_annot = row['filename'].split("\\")[-1]
-#    time_annot_start = row['start']
-#    time_annot_end = row['end']
-#    detected = False
-#    for _, d in detections.iterrows():  # loop over detections
-#        filename_det = d['filename']
-#        start_det = d['start']
-#        end_det = start_det + d['end']
-        # if the filenames match and the annotated time falls with the start and
-        # end time of the detection interval, consider the call detected
-#        if filename_annot == filename_det and time_annot_start >= start_det and time_annot_end <= end_det:
-#            detected = True
-#            break
-
-#    detected_list.append(detected)
-
-#annotations['detected'] = detected_list  # add column to the annotations table
-
-#annotations.to_excel('detected_annots.xlsx')
-```
-
-    done
-    
 
 
 ```python
@@ -191,11 +185,6 @@ def compute_detections(labels, scores, threshold=0.5):
 
 
 ```python
-from ketos.data_handling.data_feeding import JointBatchGen
-
-import os 
-import csv
-
 output_dir = main_folder + '\\' + 'metrics'
 
 db = dbi.open_file(db_name, 'r')
@@ -293,29 +282,26 @@ with open(os.path.join(os.getcwd(), output_dir, "metrics.csv"), 'a', encoding='U
 db.close()
 ```
 
-    Length of labels is 284
+    Length of labels is 426
     
-    Saving detections output to C:\Users\kzammit\Documents\Detector\manual_detector_2sec\pp-test\metrics/
+    Saving detections output to C:\Users\kzammit\Documents\Detector\detector-1sec\pp-test\metrics/
     
-    Precision: 0.25
-    Recall: 0.9014084507042254
-    F1 Score: 0.3914373088685015
+    Precision: 0.5
+    Recall: 0.9154929577464789
+    F1 Score: 0.6467661691542288
     
     ConfusionMatrix:
     
     [TP, FN]
     [FP, TN]
-    [64, 7]
-    [192, 21]
+    [195, 18]
+    [195, 18]
     
-    Saving metrics to C:\Users\kzammit\Documents\Detector\manual_detector_2sec\pp-test\metrics/
+    Saving metrics to C:\Users\kzammit\Documents\Detector\detector-1sec\pp-test\metrics/
     
 
 
 ```python
-import matplotlib.pyplot as plt
-import seaborn as sns
-
 def confusion_matrix_plot(cf, output_folder,
                           group_names=None,
                           categories='auto',
@@ -430,13 +416,11 @@ def confusion_matrix_plot(cf, output_folder,
 
 
 ```python
-from sklearn.metrics import confusion_matrix
-
 classifications_file = output_dir + '\\' + 'classifications.csv'
 
 classifications = pd.read_csv(classifications_file)
 
-cm = confusion_matrix(classifications['label'], classifications['predicted'])
+cm = confusion_matrix_sklearn(classifications['predicted'], classifications['label'])
 
 labels = ['True Pos', 'False Neg', 'False Pos', 'True Neg']
 categories = ['Ringed Seal', 'Noise']
@@ -453,9 +437,31 @@ confusion_matrix_plot(cm, output_dir, group_names=labels, categories=categories,
 
 
     
-![png](output_16_1.png)
+![png](output_17_1.png)
     
 
+
+
+```python
+results_table = detections
+
+#results_table = results_table[results_table.inc != 'Y']
+#results_table = results_table[results_table.label == 1]
+
+cols = ['filename']
+results_table.loc[:,cols] = results_table.loc[:,cols].ffill()
+results_table['Selection'] = results_table.index +1
+results_table['View'] = 'Spectrogram 1'
+results_table['Channel'] = 1
+results_table['Begin Path'] = r'C:\Users\kzammit\Documents\Detector\detector-1sec\pp-test\audio' + '\\' + results_table.filename
+results_table['File Offset (s)'] = results_table.start
+results_table = results_table.rename(columns={"start": "Begin Time (s)", "end": "End Time (s)", "filename": "Begin File"})
+results_table['Begin File'] = results_table['Begin File']
+results_table['Low Freq (Hz)'] = 100
+results_table['High Freq (Hz)'] = 1200
+
+results_table.to_csv(main_folder + '\\' + 'raven_formatted_results.txt', index=False, sep='\t')
+```
 
 
 ```python

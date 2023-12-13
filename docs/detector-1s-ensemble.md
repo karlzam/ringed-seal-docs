@@ -1,4 +1,4 @@
-# Ringed Seal Detector 1s Ensemble
+# Training 1s Ensemble
 
 This notebook has the final code used to create the ringed seal detector. 
 
