@@ -13,6 +13,7 @@ Notes:
 Summary: **NARW, Transfer Learning, ResNet vs VGG, 3 different locations**
 
 Notes: 
+
 - ResNet outperformed VGG
 - talks about the limitations very well
 - need large amounts of data 
@@ -29,6 +30,7 @@ Notes:
 Summary: **Fine tuning of CNN on distinctly different soundscape, odontocete, pretrained efficient net**
 
 Notes: 
+
 - Fine tune "small scale CNN"
 - Fine tuning significantly improves  the performance of the CNN
 - Each channel of the input RGB image corresponds to a single spectrogram computed at one of three different time-frequency resolutions (frequency bins of widths 93.75 Hz, 46.88 Hz and 23.44 Hz corresponding to FFT sizes of 1024, 2048 and 4096) standardized for the sampling rate 96 kHz. The spectrogram values are standardized to correspond to the range − 80 to 0 dBfs.
@@ -41,7 +43,9 @@ Notes:
 Summary: **ResNet, Binary, NARW, compared to LDA, looked at SNR**
 
 Structure of paper: 
-- Intro:
+
+Intro:
+
   - Introduce species 
   - Explain area 
   - Explain motivation for conservation efforts (vessel speed, etc)
@@ -109,6 +113,7 @@ Structure of paper:
     - "consider a wider temporal context"
 
 Notes:
+
 - Classical methods plateau at 50% recall when false detections are kept below 10%
 - Last decade, ML are now the way to go
 - CNNs have been used to analyze info in spectrograms (with examples)
@@ -117,6 +122,4 @@ Notes:
 - Statement about not enhancing SNR before feeding to neural network
 - Quasi-random time shifts are desirable for DNN classifier bc they encourage network to learn a more general, time translation invariant, representation of the upcall 
 - F1 score defined as the "harmonic mean of precision and recall", attaches equal importance to the two
-
-![plot](kirsebom.png)
 
