@@ -2,10 +2,23 @@
 
 ## Lakshminarayanan et al. 2017 - Simple and Scalable Predictive Uncertainty Estimation using Deep Ensembles
 
-Summary: **Wow**
+Summary: **Train an ensemble, some other stuff about adversarial training and proper scoring, fig 2 useful**
 
 Notes:
-- 
+
+- NNs tend to produce overconfident predictions 
+- calibration: frequentist notion of uncertainty which measures the discrepancy between subjective forecasts and
+(empirical) long-run frequencies. The quality of calibration can be measured by proper scoring rules
+[17] such as log predictive probabilities and the Brier score [9].
+- generalization of the predictive uncertainty to domain shift (also referred to as out-of-distribution examples [23]), that is,
+measuring if the network knows what it knows.
+- Bayesian model averaging (BMA) assumes that the true model lies within
+the hypothesis class of the prior, and performs soft model selection to find the single best model within
+the hypothesis class [43]. In contrast, ensembles perform model combination, i.e. they combine the
+models to obtain a more powerful model; ensembles can be expected to be better when the true model
+does not lie within the hypothesis class
+-  (1) use a proper scoring rule as the training criterion, (2) use adversarial
+training [18] to smooth the predictive distributions, and (3) train an ensemble
 
 
 ## Padovese et al. 2023 - Adapting deep learning models to new acoustic environments - A case study on the North Atlantic right whale upcall
